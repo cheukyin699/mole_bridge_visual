@@ -6,7 +6,7 @@ import states
 
 # Constants
 RUNNING = True
-SIZE = (700, 500)
+SIZE = (700, 350)
 
 scrn = pygame.display.set_mode(SIZE)
 font = pygame.font.SysFont('monospace', 25, True)

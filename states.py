@@ -85,7 +85,8 @@ class MainState:
                 (Button.padding, 300), "RESET")
         self.start_bt = Button(self.surface, font, self.start,
                 (200, 300), "START")
-        self.mmass_lbl = Label(self.surface, font, (200, 400), "Molar Mass")
+        self.mmass_lbl = Label(self.surface, font, (400, 300),
+                "Molar Mass (g/mol)")
 
         self.ct_map = {
                 'm': self.mass_ct,
@@ -225,7 +226,10 @@ class MainState:
         if self.focal:
             # Draw inputted text
             img = self.font.render(self.inputted, True, (255, 255, 255))
-            self.surface.blit(img, (250, 250))
+            rect = img.get_rect()
+            rect.centerx = self.surface.get_rect().w / 2
+            rect.centery = self.surface.get_rect().h / 2
+            self.surface.blit(img, rect)
         else:
             self.surface.blit(self.arrow, (120, 85))
             self.surface.blit(self.arrow, (300, 85))
