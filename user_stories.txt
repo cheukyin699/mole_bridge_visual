@@ -1,0 +1,15 @@
+As a user, I can:
+x convert mass into moles
+x convert # of particles into moles
+x convert volume into moles
+x convert moles to mass
+x convert moles to # of particles
+x convert moles to volume
+x input chemical equation for molar mass
+x convert chemical equation to molar mass
+~ see animations of number traversing from 1 branch of the bridge to another
+
+Key:
+o - not finished
+x - finished
+~ - cancelled/removed
