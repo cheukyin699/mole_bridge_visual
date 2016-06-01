@@ -26,13 +26,14 @@ class Label:
         self.surface.blit(self.image, self.rect)
 
 class Button(Label):
+    padding = 10
     def __init__(self, surface, font, cb, pos = (0, 0), text = ""):
         Label.__init__(self, surface, font, pos, text)
         self.cb = cb
 
-        self.drect = pygame.Surface((self.rect.w, self.rect.h))
+        self.drect = pygame.Surface((self.rect.w + self.padding * 2, self.rect.h + self.padding * 2))
         self.drect.fill((50, 50, 50))
-        self.drect.blit(self.image, (0, 0))
+        self.drect.blit(self.image, (self.padding, self.padding))
 
         self.isPointIn = self.rect.collidepoint
 
@@ -70,28 +71,32 @@ class MainState:
         self.surface = surface
 
         # The buttons and labels and stuffs
-        self.mass_ct = ClickText(self.surface, font, (0, 0), "Mass")
+        self.mass_ct = ClickText(self.surface, font, (0, 0), "Mass (g)")
         self.particles_ct = ClickText(self.surface, font, (0, 100), "Particles")
-        self.volume_ct = ClickText(self.surface, font, (0, 200), "Volume @ STP")
-        self.element_ct = ClickText(self.surface, font, (150, 0), "Element")
-        self.moles_lbl = Label(self.surface, font, (150, 100), "Moles")
-        self.mass_lbl = Label(self.surface, font, (300, 0), "Mass")
-        self.particles_lbl = Label(self.surface, font, (300, 100), "Particles")
-        self.volume_lbl = Label(self.surface, font, (300, 200), "Volume @ STP")
-        self.reset_bt = Button(self.surface, font, self.reset, (0, 400),
+        self.volume_ct = ClickText(self.surface, font, (0, 200),
+                "Volume @ STP (L)")
+        self.element_ct = ClickText(self.surface, font, (200, 0), "Element")
+        self.moles_ct = ClickText(self.surface, font, (200, 100), "Moles")
+        self.mass_lbl = Label(self.surface, font, (400, 0), "Mass (g)")
+        self.particles_lbl = Label(self.surface, font, (400, 100), "Particles")
+        self.volume_lbl = Label(self.surface, font, (400, 200),
+                "Volume @ STP (L)")
+        self.reset_bt = Button(self.surface, font, self.reset, (0, 300),
                 "RESET")
         self.start_bt = Button(self.surface, font, self.start,
-                (200, 400), "START")
+                (200, 300), "START")
+        self.mmass_lbl = Label(self.surface, font, (200, 400), "Molar Mass")
 
         self.ct_map = {
                 'm': self.mass_ct,
+                'moles': self.moles_ct,
                 'p': self.particles_ct,
                 'v': self.volume_ct,
                 'e': self.element_ct
         }
 
         self.inputted = ""
-        self.last = None
+        self.last = 'm'
 
         self.element_ct.value = ""
 
@@ -99,8 +104,9 @@ class MainState:
         self.mass_ct.value = 0
         self.particles_ct.value = 0
         self.volume_ct.value = 0
-        self.moles_lbl.value = 0
+        self.moles_ct.value = 0
         self.mass_lbl.value = 0
+        self.mmass_lbl.value = 0
         self.particles_lbl.value = 0
         self.volume_lbl.value = 0
 
@@ -111,8 +117,9 @@ class MainState:
         self.particles_ct.update()
         self.volume_ct.update()
         self.element_ct.update()
-        self.moles_lbl.update()
+        self.moles_ct.update()
         self.mass_lbl.update()
+        self.mmass_lbl.update()
         self.particles_lbl.update()
         self.volume_lbl.update()
 
@@ -127,13 +134,19 @@ class MainState:
         if self.last == 'm':
             # Mass to moles
             moles = l_up.value / molar_mass
+        elif self.last == 'moles':
+            # Moles to moles
+            moles = l_up.value
         elif self.last == 'p':
             # Particles to moles
             moles = l_up.value / 6.02e23
         elif self.last == 'v':
             # Volume to moles
             moles = l_up.value / 22.4
-        self.moles_lbl.value = round(moles, 3)
+
+        if self.last != 'moles':
+            self.moles_ct.value = round(moles, 3)
+        self.mmass_lbl.value = molar_mass
 
         # Calculate each individually
         self.mass_lbl.value = round(moles * molar_mass, 3)
@@ -149,6 +162,8 @@ class MainState:
         if e.type == pygame.MOUSEBUTTONUP:
             if self.mass_ct.isPointIn(mxy):
                 self.focal = 'm'
+            elif self.moles_ct.isPointIn(mxy):
+                self.focal = 'moles'
             elif self.particles_ct.isPointIn(mxy):
                 self.focal = 'p'
             elif self.volume_ct.isPointIn(mxy):
@@ -156,9 +171,9 @@ class MainState:
             elif self.element_ct.isPointIn(mxy):
                 self.focal = 'e'
             elif self.reset_bt.isPointIn(mxy):
-                self.reset_bt.handle(e)
+                self.reset()
             elif self.start_bt.isPointIn(mxy):
-                self.start_bt.handle(e)
+                self.start()
             else:
                 self.focal = None
 
@@ -182,7 +197,6 @@ class MainState:
                 self.inputted = ""      # Input reset
                 self.ct_map[self.focal].update()
                 self.focal = None
-                self.reset()
                 return
             elif pressed[pygame.K_BACKSPACE]:
                 # Backspace?
@@ -212,10 +226,15 @@ class MainState:
             self.particles_ct.draw()
             self.volume_ct.draw()
             self.element_ct.draw()
-            self.moles_lbl.draw()
+            self.moles_ct.draw()
             self.mass_lbl.draw()
             self.particles_lbl.draw()
             self.volume_lbl.draw()
             self.reset_bt.draw()
             self.start_bt.draw()
+
+            if self.mmass_lbl.value:
+                # If there exists something in the molar mass
+                # draw it
+                self.mmass_lbl.draw()
 
