@@ -31,10 +31,6 @@ class Button(Label):
         Label.__init__(self, surface, font, pos, text)
         self.cb = cb
 
-        self.drect = pygame.Surface((self.rect.w + self.padding * 2, self.rect.h + self.padding * 2))
-        self.drect.fill((50, 50, 50))
-        self.drect.blit(self.image, (self.padding, self.padding))
-
         self.isPointIn = self.rect.collidepoint
 
     def handle(self, e):
@@ -43,7 +39,11 @@ class Button(Label):
             self.cb()
 
     def draw(self):
-        self.surface.blit(self.drect, self.rect)
+        pygame.draw.rect(self.surface, (255, 255, 255),
+                (self.rect.x - self.padding, self.rect.y - self.padding,
+                    self.rect.w + self.padding * 2, self.rect.h + self.padding * 2),
+                1)
+        self.surface.blit(self.image, self.rect)
 
 class ClickText(Label):
     def __init__(self, surface, font, pos = (0, 0), text = ""):
@@ -81,8 +81,8 @@ class MainState:
         self.particles_lbl = Label(self.surface, font, (400, 100), "Particles")
         self.volume_lbl = Label(self.surface, font, (400, 200),
                 "Volume @ STP (L)")
-        self.reset_bt = Button(self.surface, font, self.reset, (0, 300),
-                "RESET")
+        self.reset_bt = Button(self.surface, font, self.reset,
+                (Button.padding, 300), "RESET")
         self.start_bt = Button(self.surface, font, self.start,
                 (200, 300), "START")
         self.mmass_lbl = Label(self.surface, font, (200, 400), "Molar Mass")
@@ -99,6 +99,11 @@ class MainState:
         self.last = 'm'
 
         self.element_ct.value = ""
+
+        self.arrow = pygame.Surface((300, 300))
+        pygame.draw.polygon(self.arrow, (200, 0, 0), ((0, 100), (0, 200),
+            (200, 200), (200, 300), (300, 150), (200, 0), (200, 100)))
+        self.arrow = pygame.transform.scale(self.arrow, (50, 50))
 
     def reset(self):
         self.mass_ct.value = 0
@@ -222,6 +227,9 @@ class MainState:
             img = self.font.render(self.inputted, True, (255, 255, 255))
             self.surface.blit(img, (250, 250))
         else:
+            self.surface.blit(self.arrow, (120, 85))
+            self.surface.blit(self.arrow, (300, 85))
+
             self.mass_ct.draw()
             self.particles_ct.draw()
             self.volume_ct.draw()
