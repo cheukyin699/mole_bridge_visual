@@ -232,7 +232,7 @@ class MainState:
             self.surface.blit(img, rect)
         else:
             self.surface.blit(self.arrow, (120, 85))
-            self.surface.blit(self.arrow, (300, 85))
+            self.surface.blit(self.arrow, (320, 85))
 
             self.mass_ct.draw()
             self.particles_ct.draw()
